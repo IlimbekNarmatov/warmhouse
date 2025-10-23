@@ -1,0 +1,20 @@
+@startuml Warmhouse_C4_Container
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Warmhouse
+
+Person(user, "Пользователь")
+Person(device1, "Датчик 1")
+Person(device2, "Датчик 2")
+Person(deviceN, "Датчик N")
+
+System(warmhouse, "Warmhouse")
+System(temperatureService, "Температура")
+
+Rel(user, warmhouse, "Запрашивает данные по датчикам")
+Rel(warmhouse, temperatureService, "Запрашивает данные по температуре")
+Rel(temperatureService, device1, "Получает температуру с датчика")
+Rel(temperatureService, device2, "Получает температуру с датчика")
+Rel(temperatureService, deviceN, "Получает температуру с датчика")
+@enduml
