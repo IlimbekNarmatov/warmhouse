@@ -74,7 +74,7 @@
 ### 5. Визуализация контекста системы — диаграмма С4
 
 ```markdown
-[Визуализация контекста системы](https://github.com/IlimbekNarmatov/warmhouse/blob/warmhouse/diagram/warmhouse_1_5_context_diagram.png)
+![Визуализация контекста системы](https://github.com/IlimbekNarmatov/warmhouse/blob/warmhouse/diagram/warmhouse_1_5_context_diagram.png)
 ```
 
 
