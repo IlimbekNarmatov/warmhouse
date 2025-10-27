@@ -5,16 +5,12 @@
 title Warmhouse
 
 Person(user, "Пользователь")
-Person(device1, "Датчик 1")
-Person(device2, "Датчик 2")
-Person(deviceN, "Датчик N")
+Person(master, "Мастер")
 
 System(warmhouse, "Warmhouse")
-System(temperatureService, "Температура")
+System_Ext(temperatureService, "Температура")
 
 Rel(user, warmhouse, "Запрашивает данные по датчикам")
+Rel(master, warmhouse, "Создает или удаляет датчик")
 Rel(warmhouse, temperatureService, "Запрашивает данные по температуре")
-Rel(temperatureService, device1, "Получает температуру с датчика")
-Rel(temperatureService, device2, "Получает температуру с датчика")
-Rel(temperatureService, deviceN, "Получает температуру с датчика")
 @enduml
