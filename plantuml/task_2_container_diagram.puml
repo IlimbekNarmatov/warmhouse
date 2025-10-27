@@ -1,0 +1,38 @@
+@startuml Warmhouse_C4_Container
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "Пользователь")
+Container(mobileApp, "Мобильное приложение")
+Container(webApp, "Веб сайт")
+
+System_Boundary(devices, "Датчики"){
+    System_Ext(device1, "Датчик 1")
+    System_Ext(device2, "Датчик 2")
+}
+
+System_Boundary(warmhouse, "Warmhouse"){
+    Container(monitoring, "Телеметрия", "Мониторинг и история")
+    Container(auth, "Авторизация", "Регистрация, авторизация пользователя")
+    Container(deviceAuth, "Датчики", "Добавления, удаления датчиков")
+    Container(push, "Уведомления")
+    ContainerDb(userDb, "База данных пользователя")
+    ContainerDb(deviceDb, "База данных датчиков")
+}
+
+System_Ext(pushExtService, "Система отправки уведомлений")
+
+Rel(user, mobileApp, " ")
+Rel(user, webApp, " ")
+Rel(mobileApp, warmhouse, " ")
+Rel(webApp, warmhouse, " ")
+Rel(warmhouse, devices, " ")
+Rel(auth, userDb, " ")
+Rel(auth, push, " ")
+Rel(deviceAuth, push, " ")
+Rel(monitoring, push, " ")
+Rel(deviceAuth, deviceDb, " ")
+Rel(monitoring, deviceDb, " ")
+Rel(push, pushExtService, " ")
+
+@enduml
