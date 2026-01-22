@@ -1,0 +1,14 @@
+@startuml
+!include  https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+hide stereotype
+
+Person(client, "Клиент")
+Person(master, "Мастер")
+System(smartHome, "Управление умным домом")
+System_Ext(device, "Датчики тепла")
+
+Rel(smartHome, device, "Обновляет данные, управляет датчиками")
+Rel(client, smartHome, "Просматривает и управляет отоплением")
+Rel(master, smartHome, "Добавляет новые датчики отопление")
+@enduml
