@@ -1,0 +1,24 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+System_Ext(device, "Датчики")
+
+System_Boundary(smartHomeSystem, "Управление умным домом"){
+    Container(gateway, "API Gateway", "Go Service", "Единая точка входа в систему для клиентских приложений. Ответственен за: маршрутизацию, базовую авторизацию, агрегацию данных.")
+    Container_Boundary(deviceIntegrationContainer, "Интеграция Устройств"){
+        Component(apiLayer, "Api Layer", "", "Обрабатывает HTTP запросы")
+        Component(repo, "Repository", "", "Абстракция доступа к данным")
+        ComponentDb(deviceIntegrationDB, "База Данных", "", " ")
+        Component(useCases, "Use Cases", "", "Бизнес-логика контейнера")
+        Component(networkClient, "Network Client", "", "Клиент для доступа к датчикам")
+    }
+}
+
+Rel(gateway, deviceIntegrationContainer, " ")
+Rel(apiLayer, useCases, " ")
+Rel(useCases, repo, " ")
+Rel(repo, deviceIntegrationDB, " ")
+Rel(repo, networkClient, " ")
+Rel(networkClient, device, " ")
+@enduml

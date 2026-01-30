@@ -62,11 +62,8 @@
 **Диаграмма контейнеров (Containers)**
 ![Container diagram](diagrams/task_2_container_diagram.png)
 
-Добавьте диаграмму.
-
 **Диаграмма компонентов (Components)**
-
-Добавьте диаграмму для каждого из выделенных микросервисов.
+![Component diagram](diagrams/task_2_component_diagram.png)
 
 **Диаграмма кода (Code)**
 
