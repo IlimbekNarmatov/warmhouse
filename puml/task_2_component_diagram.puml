@@ -8,7 +8,7 @@ System_Boundary(smartHomeSystem, "Управление умным домом"){
     Container(gateway, "API Gateway", "Go Service", "Единая точка входа в систему для клиентских приложений. Ответственен за: маршрутизацию, базовую авторизацию, агрегацию данных.")
     Container_Boundary(deviceIntegrationContainer, "Интеграция Устройств"){
         Component(apiLayer, "Api Layer", "", "Обрабатывает HTTP запросы")
-        Component(repo, "Repository", "", "Абстракция доступа к данным")
+        Component(repo, "Repository", "", "Инкапсулирует доступ к базе данных и физическим устройствам")
         ComponentDb(deviceIntegrationDB, "База Данных", "", " ")
         Component(useCases, "Use Cases", "", "Бизнес-логика контейнера")
         Component(networkClient, "Network Client", "", "Клиент для доступа к датчикам")
