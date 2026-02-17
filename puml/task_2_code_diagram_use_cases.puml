@@ -1,0 +1,54 @@
+@startuml
+title DeviceIntegration - UseCases (Code Diagram)
+
+package "application" {
+
+    class RegisterDeviceUseCase {
+        -repo: DeviceRepository
+        +Execute(deviceData)
+    }
+
+    class GetDeviceStateUseCase {
+        -gateway: DeviceGateway
+        -repo: DeviceRepository
+        +Execute(deviceId) : DeviceState
+    }
+
+    class GetDeviceUseCase {
+        -repo: DeviceRepository
+        +Execute(deviceId) : Device
+    }
+
+    class ExecuteDeviceCommandUseCase {
+        -gateway: DeviceGateway
+        -repo: DeviceRepository
+        +Execute(deviceId, command) : DeviceState
+    }
+
+}
+
+package "domain" {
+
+    interface DeviceRepository {
+        + findDevice(deviceId): Device
+        + saveDevice(deviceData)
+    }
+
+    interface DeviceGateway {
+        + sendCommand(command, deviceId)
+        + fetchState(deviceId): DeviceState
+    }
+
+    class Device
+    class DeviceState
+
+}
+
+GetDeviceUseCase --> DeviceRepository
+RegisterDeviceUseCase --> DeviceRepository
+GetDeviceStateUseCase --> DeviceGateway
+ExecuteDeviceCommandUseCase --> DeviceGateway
+GetDeviceStateUseCase --> DeviceRepository
+ExecuteDeviceCommandUseCase --> DeviceRepository
+
+@enduml

@@ -67,7 +67,7 @@
 
 **Диаграмма кода (Code)**
 
-Добавьте одну диаграмму или несколько.
+![Code diagram. Use Cases.](diagrams/task_2_code_diagram_use_cases.png)
 
 # Задание 3. Разработка ER-диаграммы
 
