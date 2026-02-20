@@ -25,6 +25,10 @@ package "application" {
         +Execute(deviceId, command) : DeviceState
     }
 
+    class DeleteDeviceUseCase {
+        - repo: DeviceRepository
+        + Execute(deviceId)
+    }
 }
 
 package "domain" {
@@ -32,6 +36,7 @@ package "domain" {
     interface DeviceRepository {
         + findDevice(deviceId): Device
         + saveDevice(deviceData)
+        + deleteDevice(deviceId)
     }
 
     interface DeviceGateway {
@@ -39,9 +44,18 @@ package "domain" {
         + fetchState(deviceId): DeviceState
     }
 
-    class Device
-    class DeviceState
+    class Device {
+        id: String
+        name: String
+        type: String
+        homeId: String
+    }
 
+    class DeviceState {
+        deviceId: String
+        status: String
+        timestamp: DateTime
+    }
 }
 
 GetDeviceUseCase --> DeviceRepository
@@ -50,5 +64,11 @@ GetDeviceStateUseCase --> DeviceGateway
 ExecuteDeviceCommandUseCase --> DeviceGateway
 GetDeviceStateUseCase --> DeviceRepository
 ExecuteDeviceCommandUseCase --> DeviceRepository
+DeleteDeviceUseCase --> DeviceRepository
+
+GetDeviceUseCase --> Device
+RegisterDeviceUseCase--> Device
+GetDeviceStateUseCase --> DeviceState
+ExecuteDeviceCommandUseCase --> DeviceState
 
 @enduml
