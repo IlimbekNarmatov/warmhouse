@@ -1,0 +1,63 @@
+@startuml
+title DeviceIntegration - Data (Code Diagram)
+
+package "domain" {
+    interface DeviceRepository {
+        + findDevice(deviceId): Device
+        + findAllDevices(): Device[]
+        + saveDevice(deviceData)
+        + updateDevice(deviceId, deviceData)
+        + deleteDevice(deviceId)
+    }
+    interface DeviceGateway {
+        + sendCommand(command, deviceId)
+        + fetchState(deviceId): DeviceState
+    }
+    class Device {
+        id: String
+        name: String
+        type: String
+        homeId: String
+    }
+    class DeviceState {
+        deviceId: String
+        status: String
+        timestamp: DateTime
+    }
+}
+
+package "infrastructure" {
+    class DeviceRepositoryImpl {
+        - db: DatabaseClient
+        + findDevice(deviceId): Device
+        + findAllDevices(): Device[]
+        + saveDevice(deviceData)
+        + updateDevice(deviceId, deviceData)
+        + deleteDevice(deviceId)
+    }
+    class DeviceGatewayImpl {
+        - networkClient: NetworkClient
+        + sendCommand(command, deviceId)
+        + fetchState(deviceId): DeviceState
+    }
+    class DatabaseClient {
+        - pool: PgxPool
+        + Query(sql, args): Rows
+        + Exec(sql, args): Result
+        + Close()
+    }
+    class NetworkClient {
+        - httpClient: HttpClient
+        - baseUrl: String
+        + Get(url): Response
+        + Post(url, body): Response
+    }
+}
+
+DeviceRepositoryImpl ..|> DeviceRepository
+DeviceGatewayImpl ..|> DeviceGateway
+DeviceRepositoryImpl --> DatabaseClient
+DeviceGatewayImpl --> NetworkClient
+DeviceRepositoryImpl --> Device
+DeviceGatewayImpl --> DeviceState
+@enduml

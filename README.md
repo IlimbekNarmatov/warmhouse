@@ -68,6 +68,7 @@
 **Диаграмма кода (Code)**
 
 ![Code diagram. Use Cases.](diagrams/task_2_code_diagram_use_cases.png)
+![Code diagram. Data.](diagrams/task_2_code_diagram_data.png)
 
 # Задание 3. Разработка ER-диаграммы
 
