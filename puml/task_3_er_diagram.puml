@@ -1,0 +1,38 @@
+@startuml
+skinparam linetype ortho
+
+entity DeviceType {
+    * id : int <<PK>>
+    --
+    name : varchar(100)
+    description : text
+    category : enum(heating, lighting, gate, camera, sensor)
+}
+
+entity Device {
+    * id : int <<PK>>
+    --
+    * device_type_id : int <<FK>>
+    name : varchar(100)
+    serial_number : varchar(100) <<unique>>
+    location : varchar(255)
+    status : enum(active, inactive, error)
+    created_at : timestamp
+    updated_at : timestamp
+}
+
+entity SupportedCommand {
+    * id : int <<PK>>
+    --
+    * device_type_id : int <<FK>>
+    command_name : varchar(100)
+    control_type : enum(slider, toggle, button, select)
+    control_config : jsonb
+    parameter_schema : jsonb
+    description : text
+}
+
+DeviceType ||--o{ Device
+DeviceType ||--o{ SupportedCommand
+
+@enduml
