@@ -6,19 +6,23 @@ System_Ext(device, "Датчики")
 
 System_Boundary(smartHomeSystem, "Управление умным домом"){
     Container(gateway, "API Gateway", "Go Service", "Единая точка входа в систему для клиентских приложений. Ответственен за: маршрутизацию, базовую авторизацию, агрегацию данных.")
+    Container(messageBus, "Message Broker", "RabbitMQ", "Асинхронная доставка команд и событий")
     Container_Boundary(deviceIntegrationContainer, "Интеграция Устройств"){
         Component(apiLayer, "Api Layer", "", "Обрабатывает HTTP запросы")
         Component(data, "Data", "", "Инкапсулирует доступ к базе данных и физическим устройствам. Реализация DeviceRepository и DeviceGateway")
         ComponentDb(deviceIntegrationDB, "База Данных", "", " ")
         Component(useCases, "Use Cases", "", "Бизнес-логика контейнера")
         Component(networkClient, "Network Client", "", "Клиент для доступа к датчикам")
+        Component(eventPublisher, "Event Publisher", "", "Публикует состояние устройств в Message Broker")
     }
 }
 
-Rel(gateway, deviceIntegrationContainer, " ")
+Rel(gateway, apiLayer, " ")
 Rel(apiLayer, useCases, " ")
 Rel(useCases, data, " ")
+Rel(useCases, eventPublisher, " ")
 Rel(data, deviceIntegrationDB, " ")
 Rel(data, networkClient, " ")
 Rel(networkClient, device, " ")
+Rel(eventPublisher, messageBus ," ")
 @enduml
