@@ -48,7 +48,6 @@ package "domain" {
         id: String
         name: String
         type: String
-        homeId: String
     }
 
     class DeviceState {
