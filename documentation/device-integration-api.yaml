@@ -1,0 +1,309 @@
+openapi: 3.0.0
+info:
+  title: DeviceIntegration Service API
+  description: |
+    Инфраструктурный сервис для управления реестром устройств и взаимодействия с физическими датчиками.
+
+    ## Ответственность
+    - Регистрация и удаление устройств
+    - Получение информации об устройстве
+    - Получение текущего состояния с физических датчиков
+    - Отправка команд на устройства
+    - Публикация состояния устройств в Message Broker (RabbitMQ)
+
+    ## Архитектурные решения
+    - DeviceState не хранится в БД — читается с датчика и публикуется в Message Broker
+    - Команды не логируются в БД — история хранится в сервисе Телеметрии
+    - homeId не хранится — привязка устройства к дому управляется сервисом Home
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/api/v1
+
+tags:
+  - name: Devices
+    description: Регистрация, получение и удаление устройств
+  - name: State
+    description: Текущее состояние устройства (читается с физического датчика)
+  - name: Commands
+    description: Отправка команд на физическое устройство
+
+paths:
+  /devices:
+    post:
+      tags: [Devices]
+      summary: Зарегистрировать новое устройство
+      description: Регистрирует новое устройство в системе со статусом inactive.
+      operationId: registerDevice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceCreate'
+            example:
+              device_type_id: 1
+              name: "Обогреватель гостиная"
+              serial_number: "HT-001-A"
+      responses:
+        '201':
+          description: Устройство зарегистрировано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+        '400':
+          description: Невалидные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 400
+                message: "serial_number is required"
+        '409':
+          description: Устройство с таким serial_number уже существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 409
+                message: "Device with serial_number HT-001-A already exists"
+
+  /devices/{deviceId}:
+    get:
+      tags: [Devices]
+      summary: Получить устройство по ID
+      operationId: getDevice
+      parameters:
+        - $ref: '#/components/parameters/DeviceId'
+      responses:
+        '200':
+          description: Устройство найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+              example:
+                id: 1
+                device_type_id: 1
+                name: "Обогреватель гостиная"
+                serial_number: "HT-001-A"
+                status: "active"
+                created_at: "2025-01-15T10:30:00Z"
+                updated_at: "2025-01-15T10:30:00Z"
+        '404':
+          $ref: '#/components/responses/DeviceNotFound'
+
+    delete:
+      tags: [Devices]
+      summary: Удалить устройство
+      operationId: deleteDevice
+      parameters:
+        - $ref: '#/components/parameters/DeviceId'
+      responses:
+        '204':
+          description: Устройство удалено
+        '404':
+          $ref: '#/components/responses/DeviceNotFound'
+
+  /devices/{deviceId}/state:
+    get:
+      tags: [State]
+      summary: Получить текущее состояние устройства
+      description: |
+        Читает состояние напрямую с физического датчика.
+        После получения публикует событие device.state.updated в Message Broker.
+        Данные НЕ сохраняются в БД этого сервиса.
+      operationId: getDeviceState
+      parameters:
+        - $ref: '#/components/parameters/DeviceId'
+      responses:
+        '200':
+          description: Текущее состояние устройства
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceState'
+              examples:
+                heater:
+                  summary: Обогреватель
+                  value:
+                    device_id: 1
+                    status: "active"
+                    state_data:
+                      temperature: 23.5
+                      target_temperature: 24.0
+                      mode: "comfort"
+                    recorded_at: "2025-01-15T14:30:00Z"
+                light:
+                  summary: Лампа
+                  value:
+                    device_id: 2
+                    status: "active"
+                    state_data:
+                      brightness: 80
+                    recorded_at: "2025-01-15T14:30:00Z"
+                gate:
+                  summary: Ворота
+                  value:
+                    device_id: 3
+                    status: "active"
+                    state_data:
+                      is_open: false
+                      is_locked: true
+                    recorded_at: "2025-01-15T14:30:00Z"
+        '404':
+          $ref: '#/components/responses/DeviceNotFound'
+        '503':
+          description: Датчик недоступен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 503
+                message: "Device HT-001-A is unreachable"
+
+  /devices/{deviceId}/commands:
+    post:
+      tags: [Commands]
+      summary: Отправить команду на устройство
+      description: |
+        Валидирует команду по SupportedCommand, отправляет на физическое устройство
+        и возвращает обновлённое состояние. Публикует событие в Message Broker.
+      operationId: executeDeviceCommand
+      parameters:
+        - $ref: '#/components/parameters/DeviceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommandRequest'
+            examples:
+              set_temperature:
+                summary: Установить температуру
+                value:
+                  command_name: "set_temperature"
+                  parameters:
+                    target_temp: 23.5
+              turn_on:
+                summary: Включить
+                value:
+                  command_name: "turn_on"
+                  parameters: {}
+              open_gate:
+                summary: Открыть ворота
+                value:
+                  command_name: "open"
+                  parameters: {}
+      responses:
+        '200':
+          description: Команда выполнена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceState'
+        '400':
+          description: Невалидная команда или параметры
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: 400
+                message: "Command 'fly' is not supported for device type 'heater_v1'"
+        '404':
+          $ref: '#/components/responses/DeviceNotFound'
+        '503':
+          description: Датчик недоступен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  parameters:
+    DeviceId:
+      name: deviceId
+      in: path
+      required: true
+      schema:
+        type: integer
+
+  responses:
+    DeviceNotFound:
+      description: Устройство не найдено
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 404
+            message: "Device with id 999 not found"
+
+  schemas:
+    Device:
+      type: object
+      properties:
+        id:
+          type: integer
+        device_type_id:
+          type: integer
+        name:
+          type: string
+        serial_number:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive, error]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    DeviceCreate:
+      type: object
+      required: [device_type_id, name, serial_number]
+      properties:
+        device_type_id:
+          type: integer
+        name:
+          type: string
+        serial_number:
+          type: string
+
+    DeviceState:
+      type: object
+      description: Транзитный объект. Не хранится в БД — публикуется в Message Broker.
+      properties:
+        device_id:
+          type: integer
+        status:
+          type: string
+        state_data:
+          type: object
+        recorded_at:
+          type: string
+          format: date-time
+
+    CommandRequest:
+      type: object
+      required: [command_name]
+      properties:
+        command_name:
+          type: string
+        parameters:
+          type: object
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
