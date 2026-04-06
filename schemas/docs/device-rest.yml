@@ -1,0 +1,47 @@
+openapi: 3.0.0
+info:
+  title: Device Service API
+  version: 1.0.0
+  description: Сервис управления устройствами умного дома
+
+paths:
+  /api/v1/devices/{id}/state:
+    get:
+      summary: Получить состояние устройства
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Состояние устройства
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceState'
+        '404':
+          description: Устройство не найдено
+
+components:
+  schemas:
+    DeviceState:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        type:
+          type: string
+          enum: [heater, light, gate, camera]
+        status:
+          type: string
+        location:
+          type: string
+        protocol:
+          type: string
+        updated_at:
+          type: string
+          format: date-time

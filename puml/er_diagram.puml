@@ -1,0 +1,35 @@
+@startuml
+entity "devices" {
+    *id : SERIAL <<PK>>
+    --
+    *name : VARCHAR(100)
+    *type : VARCHAR(50)
+    *status : VARCHAR(20)
+    *location : VARCHAR(100)
+    *protocol : VARCHAR(50)
+    *created_at : TIMESTAMP
+    *updated_at : TIMESTAMP
+}
+
+entity "lights" {
+    *id : SERIAL <<PK>>
+    --
+    *device_id : INT
+    *name : VARCHAR(100)
+    *status : VARCHAR(20)
+    *brightness : INT
+    *location : VARCHAR(100)
+    *updated_at : TIMESTAMP
+    *created_at : TIMESTAMP
+}
+entity "gates" {
+    *id : SERIAL <<PK>>
+    --
+    *device_id : INT
+    *name : VARCHAR(100)
+    *status : VARCHAR(20)
+    *location : VARCHAR(100)
+    *updated_at : TIMESTAMP
+    *created_at : TIMESTAMP
+}
+@enduml

@@ -1,0 +1,77 @@
+@startuml
+
+interface "Repository" {
+    +GetByID(ctx, id): Device, error
+    +Create(ctx, device): Device, error
+    +Delete(ctx, id): error
+}
+
+interface "Messaging" {
+    +PublishState(ctx, deviceID, state): error
+    +PublishResult(ctx, deviceID, result): error
+    +SubscribeToCommands(ctx, handler): error
+}
+
+interface "DeviceConnector" {
+    +GetState(ctx, deviceID): State, error
+    +SendCommand(ctx, deviceID, command): Result, error
+}
+
+class "Device (domain model)" {
+    +ID: int
+    +Name: string
+    +Type: string
+    +Status: string
+    +Location: string
+    +Protocol: string
+    +CreatedAt: time.Time
+}
+
+class "GetDeviceStateUseCase" {
+    -repo: Repository
+    -messaging: Messaging
+    -connector: DeviceConnector
+    +Execute(ctx, id): Device, error
+}
+
+class "ExecuteCommandUseCase" {
+    -messaging: Messaging
+    -connector: DeviceConnector
+    +Execute(ctx, deviceID, command): error
+}
+
+class "Handler" {
+    -getStateUC: GetDeviceStateUseCase
+    +GetState(c *gin.Context)
+}
+
+class "PostgresRepository" {
+    -pool: *pgxpool.Pool
+}
+
+class "RabbitMQMessaging" {
+    -conn: *amqp.Connection
+}
+
+class "PhysicalDeviceConnector" {
+    -httpClient: *http.Client
+}
+
+Handler --> GetDeviceStateUseCase
+Messaging --> ExecuteCommandUseCase : команды от сервисов
+
+GetDeviceStateUseCase --> Repository
+GetDeviceStateUseCase --> Messaging
+GetDeviceStateUseCase --> DeviceConnector
+GetDeviceStateUseCase --> "Device (domain model)"
+
+ExecuteCommandUseCase --> Messaging
+ExecuteCommandUseCase --> DeviceConnector
+ExecuteCommandUseCase --> "Device (domain model)"
+
+Repository <|.. PostgresRepository
+Messaging <|.. RabbitMQMessaging
+DeviceConnector <|.. PhysicalDeviceConnector
+PostgresRepository --> "Device (domain model)"
+RabbitMQMessaging --> "Device (domain model)"
+@enduml

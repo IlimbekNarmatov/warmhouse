@@ -1,0 +1,33 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+Person(user, "Клиент")
+System_Ext(device_ext, "Датчики")
+System_Boundary(smartHome, "Управление умным домом") {
+    Container(webApp, "Веб приложение", "")
+    Container(warm, "Управление отоплением", "Golang, PostgreSQL", "Существующий монолит")
+    Container(light, "Управление освещением", "Golang, PostgreSQL")
+    Container(gate, "Управление воротами", "Golang, PostgreSQL")
+    Container(watch, "Управление наблюдением", "Golang, PostgreSQL")
+    Container(device, "Устройства", "Golang, PostgreSQL")
+    Container(telemetry, "Телеметрия", "Golang, PostgreSQL")
+    Container(messageBus, "Message Broker", "RabbitMQ")
+}
+
+Rel(user, webApp, " ")
+Rel(webApp, warm, " ")
+Rel(webApp, light, " ")
+Rel(webApp, gate, " ")
+Rel(webApp, watch, " ")
+Rel(webApp, telemetry, " ")
+Rel(webApp, device, " ")
+
+Rel(warm, messageBus, " ")
+Rel(light, messageBus, " ")
+Rel(gate, messageBus, " ")
+Rel(watch, messageBus, " ")
+Rel(device, messageBus, " ")
+Rel(telemetry, messageBus, " ")
+
+Rel(device, device_ext, " ")
+Rel(warm, device_ext, " ")
+@enduml

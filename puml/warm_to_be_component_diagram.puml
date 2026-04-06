@@ -1,0 +1,29 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Container(webApp, "Веб приложение", "")
+Container(messageBus, "Message Broker", "RabbitMQ")
+ContainerDb(warmDb, "База данных монолит", "PostgreSQL")
+System_Ext(device_ext, "Старые датчики")
+
+Container_Boundary(warm, "Управление отоплением") {
+    Component(handlers, "handlers", "", "Обрабатывает HTTP запросы")
+    Component(db, "db", "", "Обрабатывает запросы в Базу данных")
+    Component(services, "services", "", "Бизнес-логика отопления")
+    Component(messaging, "messaging", "", "Публикация и подписка на сообщения")
+    Component(models, "models", "", "Модельки сервиса")
+}
+
+Rel(webApp, handlers, " ")
+Rel(handlers, services, " ")
+Rel(services, db, " ")
+Rel(services, messaging, " ")
+Rel(services, models, " ")
+Rel(db, models, " ")
+Rel(handlers, models, " ")
+Rel(db, warmDb, " ")
+Rel(messaging, models, " ")
+Rel(services, device_ext, "Старые датчики")
+Rel(messaging, messageBus, "Новые датчики")
+@enduml

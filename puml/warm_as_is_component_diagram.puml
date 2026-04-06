@@ -1,0 +1,25 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Container(webApp, "Веб приложение", "")
+
+Container_Boundary(warm, "Управление отоплением") {
+    Component(handlers, "handlers", "", "Обрабатывает HTTP запросы")
+    Component(db, "db", "", "Обрабатывает запросы в Базу данных")
+    Component(services, "services", "", "Обрабатывает запросы на внешние сервисы")
+    Component(models, "models", "", "Модельки сервиса")
+}
+
+System_Ext(device_ext, "Датчики")
+ContainerDb(warmDb, "База данных монолит")
+
+Rel(webApp, handlers, " ")
+Rel(handlers, db, " ")
+Rel(handlers, services, " ")
+Rel(services, models, " ")
+Rel(db, models, " ")
+Rel(handlers, models, " ")
+Rel(db, warmDb, " ")
+Rel(services, device_ext, " ")
+@enduml

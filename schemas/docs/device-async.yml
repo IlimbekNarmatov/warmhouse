@@ -1,0 +1,77 @@
+asyncapi: 2.6.0
+info:
+  title: Device Service Async API
+  version: 1.0.0
+  description: Асинхронное взаимодействие сервиса устройств
+
+channels:
+  device.command:
+    description: Команды от бизнес-сервисов к устройствам
+    subscribe:
+      summary: Device service слушает команды
+      message:
+        $ref: '#/components/messages/DeviceCommand'
+
+  device.result:
+    description: Результаты выполнения команд
+    publish:
+      summary: Device service публикует результаты
+      message:
+        $ref: '#/components/messages/CommandResult'
+
+  device.state:
+    description: Состояние устройств
+    publish:
+      summary: Device service публикует состояние
+      message:
+        $ref: '#/components/messages/DeviceState'
+
+components:
+  messages:
+    DeviceCommand:
+      payload:
+        type: object
+        properties:
+          device_id:
+            type: integer
+          command:
+            type: string
+            enum: [get_state, turn_on, turn_off, open, close]
+          source:
+            type: string
+            description: Сервис-отправитель (warm, light, gate, watch)
+          timestamp:
+            type: string
+            format: date-time
+
+    CommandResult:
+      payload:
+        type: object
+        properties:
+          device_id:
+            type: integer
+          command:
+            type: string
+          success:
+            type: boolean
+          value:
+            type: string
+          timestamp:
+            type: string
+            format: date-time
+
+    DeviceState:
+      payload:
+        type: object
+        properties:
+          device_id:
+            type: integer
+          device_type:
+            type: string
+          status:
+            type: string
+          value:
+            type: string
+          timestamp:
+            type: string
+            format: date-time
